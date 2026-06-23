@@ -1321,6 +1321,21 @@ max-w-none
 		{children}
 	</div>
 }
+
+const TokenUsageBadge = ({ tokenUsage }: { tokenUsage?: { inputTokens: number; outputTokens: number; totalTokens: number; estimatedCostUsd: number } }) => {
+	if (!tokenUsage || tokenUsage.totalTokens === 0) return null
+	const costStr = tokenUsage.estimatedCostUsd < 0.001
+		? '<$0.001'
+		: `$${tokenUsage.estimatedCostUsd.toFixed(4)}`
+	return (
+		<div className='flex items-center gap-2 mt-1 text-void-fg-4 opacity-60 hover:opacity-100 transition-opacity duration-200 select-none'>
+			<span className='text-[10px]'>
+				⬆ {tokenUsage.inputTokens.toLocaleString()} ⬇ {tokenUsage.outputTokens.toLocaleString()} · {costStr}
+			</span>
+		</div>
+	)
+}
+
 const AssistantMessageComponent = ({ chatMessage, isCheckpointGhost, isCommitted, messageIdx }: { chatMessage: ChatMessage & { role: 'assistant' }, isCheckpointGhost: boolean, messageIdx: number, isCommitted: boolean }) => {
 
 	const accessor = useAccessor()
@@ -1370,6 +1385,7 @@ const AssistantMessageComponent = ({ chatMessage, isCheckpointGhost, isCommitted
 				</ProseWrapper>
 			</div>
 		}
+		{'tokenUsage' in chatMessage && <TokenUsageBadge tokenUsage={(chatMessage as any).tokenUsage} />}
 	</>
 
 }

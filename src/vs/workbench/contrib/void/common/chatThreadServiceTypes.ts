@@ -63,6 +63,7 @@ export type ChatMessage =
 		reasoning: string; // reasoning from the LLM, used for step-by-step thinking
 
 		anthropicReasoning: AnthropicReasoning[] | null; // anthropic reasoning
+		tokenUsage?: { inputTokens: number; outputTokens: number; totalTokens: number; estimatedCostUsd: number }
 	}
 	| ToolMessage<ToolName>
 	| DecorativeCanceledTool

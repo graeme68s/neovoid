@@ -305,6 +305,7 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 		model: modelName,
 		messages: messages as any,
 		stream: true,
+		stream_options: { include_usage: true },
 		...nativeToolsObj,
 		...additionalOpenAIPayload
 		// max_completion_tokens: maxTokens,
@@ -332,6 +333,10 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 	let toolName = ''
 	let toolId = ''
 	let toolParamsStr = ''
+
+	// token usage tracking
+	let inputTokens = 0
+	let outputTokens = 0
 
 	openai.chat.completions
 		.create(options)
@@ -362,6 +367,12 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 					fullReasoningSoFar += newReasoning
 				}
 
+				// capture token usage from final chunk
+				if (chunk.usage) {
+					inputTokens = chunk.usage.prompt_tokens ?? 0
+					outputTokens = chunk.usage.completion_tokens ?? 0
+				}
+
 				// call onText
 				onText({
 					fullText: fullTextSoFar,
@@ -377,7 +388,15 @@ const _sendOpenAICompatibleChat = async ({ messages, onText, onFinalMessage, onE
 			else {
 				const toolCall = rawToolCallObjOfParamsStr(toolName, toolParamsStr, toolId)
 				const toolCallObj = toolCall ? { toolCall } : {}
-				onFinalMessage({ fullText: fullTextSoFar, fullReasoning: fullReasoningSoFar, anthropicReasoning: null, ...toolCallObj });
+				const PROVIDER_PRICING: Record<string, {input: number, output: number}> = {
+					'deepseek-v4-flash': { input: 0.14, output: 0.28 },
+					'deepseek-v4-pro': { input: 1.74, output: 3.48 },
+					'deepseek-reasoner': { input: 0.55, output: 2.19 },
+				}
+				const pricing = PROVIDER_PRICING[modelName] ?? { input: 0, output: 0 }
+				const estimatedCostUsd = (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000
+				const tokenUsage = { inputTokens, outputTokens, totalTokens: inputTokens + outputTokens, estimatedCostUsd }
+				onFinalMessage({ fullText: fullTextSoFar, fullReasoning: fullReasoningSoFar, anthropicReasoning: null, tokenUsage, ...toolCallObj });
 			}
 		})
 		// when error/fail - this catches errors of both .create() and .then(for await)

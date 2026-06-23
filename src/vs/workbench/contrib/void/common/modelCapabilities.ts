@@ -108,6 +108,8 @@ export const defaultModelsOfProvider = {
 	deepseek: [ // https://api-docs.deepseek.com/quick_start/pricing
 		'deepseek-chat',
 		'deepseek-reasoner',
+		'deepseek-v4-flash',
+		'deepseek-v4-pro',
 	],
 	ollama: [ // autodetected
 	],
@@ -928,18 +930,32 @@ const geminiSettings: VoidStaticProviderInfo = {
 const deepseekModelOptions = {
 	'deepseek-chat': {
 		...openSourceModelOptions_assumingOAICompat.deepseekR1,
-		contextWindow: 64_000, // https://api-docs.deepseek.com/quick_start/pricing
-		reservedOutputTokenSpace: 8_000, // 8_000,
+		contextWindow: 64_000,
+		reservedOutputTokenSpace: 8_000,
 		cost: { cache_read: .07, input: .27, output: 1.10, },
 		downloadable: false,
 	},
 	'deepseek-reasoner': {
 		...openSourceModelOptions_assumingOAICompat.deepseekCoderV2,
 		contextWindow: 64_000,
-		reservedOutputTokenSpace: 8_000, // 8_000,
+		reservedOutputTokenSpace: 8_000,
 		cost: { cache_read: .14, input: .55, output: 2.19, },
 		downloadable: false,
 	},
+	'deepseek-v4-flash': {
+		...openSourceModelOptions_assumingOAICompat.deepseekR1,
+		contextWindow: 128_000,
+		reservedOutputTokenSpace: 8_000,
+		cost: { cache_read: 0.014, input: 0.14, output: 0.28 },
+		downloadable: false,
+	},
+	'deepseek-v4-pro': {
+		...openSourceModelOptions_assumingOAICompat.deepseekR1,
+		contextWindow: 128_000,
+		reservedOutputTokenSpace: 8_000,
+		cost: { cache_read: 0.07, input: 0.27, output: 1.10 },
+		downloadable: false,
+	}
 } as const satisfies { [s: string]: VoidStaticModelInfo }
 
 
