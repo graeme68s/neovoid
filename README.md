@@ -22,10 +22,10 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 ### ✅ Done
 - **Microsoft Marketplace access** — Install Pylance, GitHub Copilot, C# Dev Kit, and every other proprietary extension. No restrictions.
 - **Dependency pinning** — All 161 dependencies locked to exact versions. VSCode and Tailwind updates will never break your install again.
+- **Token cost tracker** — Real-time spend display under every AI response. Shows input tokens, output tokens, and exact USD cost per message.
+- **Send to Chat** — Highlight any code and use the inline toolbar to send it directly to AI chat. No copy-paste.
 
 ### 🔧 v1 In Progress
-- **Token cost tracker** — Real-time spend display in the sidebar. Know exactly what each session costs.
-- **Send to Chat** — Right-click any selected code and send it directly to the AI. No copy-paste.
 - **System prompt presets** — Save and switch between modes (coding, review, architecture) with one click.
 - **Flash / Pro auto-router** — Simple queries go to the fast cheap model. Complex reasoning goes to Pro. Status bar badge shows which model is active. Toggleable.
 - **Update script** — One command to pull, compile, and package. Updates on your terms.
