@@ -51,13 +51,13 @@ All dependencies pinned to exact versions. No auto-updates. Change version numbe
 
 | Feature | Status |
 |---|---|
-| Token cost tracker | Planned |
-| Send to chat | Planned |
-| System prompt presets | Planned |
-| Update script | Planned |
-| Flash/Pro auto-router | Planned |
-| Microsoft Marketplace access | Planned |
-| Project rule files | Planned |
+| Token cost tracker | ✅ Done |
+| Send to chat | ✅ Done |
+| System prompt presets | 🔧 In Progress |
+| Update script | 🔧 In Progress |
+| Flash/Pro auto-router | 🔧 In Progress |
+| Microsoft Marketplace access | ✅ Done |
+| Project rule files | 🔧 In Progress |
 | Inline ghost text (FIM) | v2 |
 | Context indexing & @ mentions | v2 |
 | Dependency pinning | ✅ Done |
