@@ -34,9 +34,7 @@
 	"urlProtocol": "void",
 	"extensionsGallery": {
     "serviceUrl": "https://marketplace.visualstudio.com/_apis/public/gallery",
-    "itemUrl": "https://marketplace.visualstudio.com/items",
-    "controlUrl": "https://main.vscode-cdn.net/extensions/marketplace.json",
-    "recommendationsUrl": "https://az764295.vo.msecnd.net/extensions/workspaceRecommendations.json.gz"
+    "itemUrl": "https://marketplace.visualstudio.com/items"
 	},
 	"builtInExtensions": [],
 	"linkProtectionTrustedDomains": [
