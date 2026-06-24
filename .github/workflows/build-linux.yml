@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y libkrb5-dev libx11-dev libxkbfile-dev libsecret-1-dev
-          npm install --legacy-peer-deps
+          npm install --legacy-peer-deps --ignore-scripts
 
       - name: Build React
         run: npm run buildreact
