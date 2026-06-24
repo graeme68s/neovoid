@@ -83,13 +83,12 @@ export const defaultModelsOfProvider = {
 		// 'gpt-4o',
 		// 'gpt-4o-mini',
 	],
-	anthropic: [ // https://docs.anthropic.com/en/docs/about-claude/models
-		'claude-opus-4-0',
-		'claude-sonnet-4-0',
-		'claude-3-7-sonnet-latest',
-		'claude-3-5-sonnet-latest',
-		'claude-3-5-haiku-latest',
-		'claude-3-opus-latest',
+	anthropic: [
+		'claude-opus-4-8',
+		'claude-sonnet-4-6',
+		'claude-haiku-4-5',
+		'claude-opus-4-7',
+		'claude-opus-4-6',
 	],
 	xAI: [ // https://docs.x.ai/docs/models?cluster=us-east-1
 		'grok-2',
@@ -106,8 +105,6 @@ export const defaultModelsOfProvider = {
 		'gemini-2.5-pro-preview-05-06',
 	],
 	deepseek: [ // https://api-docs.deepseek.com/quick_start/pricing
-		'deepseek-chat',
-		'deepseek-reasoner',
 		'deepseek-v4-flash',
 		'deepseek-v4-pro',
 	],

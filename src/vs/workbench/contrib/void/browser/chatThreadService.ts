@@ -39,6 +39,7 @@ import { IDirectoryStrService } from '../common/directoryStrService.js';
 import { IFileService } from '../../../../platform/files/common/files.js';
 import { IMCPService } from '../common/mcpService.js';
 import { RawMCPToolCall } from '../common/mcpServiceTypes.js';
+import { setMESTier } from './mesStatusBarItem.js';
 
 
 // related to retrying when LLM message has error
@@ -802,6 +803,22 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 				let resMessageIsDonePromise: (res: ResTypes) => void // resolves when user approves this tool use (or if tool doesn't require approval)
 				const messageIsDonePromise = new Promise<ResTypes>((res, rej) => { resMessageIsDonePromise = res })
 
+				// MES badge update
+				const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true
+				if (mesEnabled) {
+					const flashModels = ['claude-haiku-4-5', 'deepseek-v4-flash', 'gpt-4.1-nano', 'gemini-2.0-flash-lite', 'llama-3.1-8b-instant']
+					const proModels = ['claude-sonnet-4-6', 'deepseek-v4-pro', 'gpt-4.1', 'gemini-2.5-pro-preview-05-06', 'llama-3.3-70b-versatile']
+					const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')
+					const userText = typeof lastUserMsg?.content === 'string' ? lastUserMsg.content : ''
+					const isComplex = userText.length > 200
+						|| /debug|architect|refactor|explain|analyse|analyze|design|implement|why|how does/i.test(userText)
+					setMESTier(isComplex ? 'pro' : 'flash')
+				} else {
+					setMESTier('off')
+				}
+
+
+
 				const llmCancelToken = this._llmMessageService.sendLLMMessage({
 					messagesType: 'chatMessages',
 					chatMode,
@@ -809,6 +826,7 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 					modelSelection,
 					modelSelectionOptions,
 					overridesOfModel,
+					globalSettings: this._settingsService.state.globalSettings,
 					logging: { loggingName: `Chat - ${chatMode}`, loggingExtras: { threadId, nMessagesSent, chatMode } },
 					separateSystemMessage: separateSystemMessage,
 					onText: ({ fullText, fullReasoning, toolCall }) => {

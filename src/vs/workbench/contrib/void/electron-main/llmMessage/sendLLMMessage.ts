@@ -7,7 +7,69 @@ import { SendLLMMessageParams, OnText, OnFinalMessage, OnError } from '../../com
 import { IMetricsService } from '../../common/metricsService.js';
 import { displayInfoOfProviderName } from '../../common/voidSettingsTypes.js';
 import { sendLLMMessageToProviderImplementation } from './sendLLMMessage.impl.js';
+// MES module-level state
 
+const mesFlashModelOfProvider: Partial<Record<string, string>> = {
+	anthropic: 'claude-haiku-4-5',
+	deepseek: 'deepseek-v4-flash',
+	openAI: 'gpt-4.1-nano',
+	gemini: 'gemini-2.0-flash-lite',
+	groq: 'llama-3.1-8b-instant',
+}
+const mesProModelOfProvider: Partial<Record<string, string>> = {
+	anthropic: 'claude-sonnet-4-6',
+	deepseek: 'deepseek-v4-pro',
+	openAI: 'gpt-4.1',
+	gemini: 'gemini-2.5-pro-preview-05-06',
+	groq: 'llama-3.3-70b-versatile',
+}
+
+const mesRouteModel = async (
+	providerName: string,
+	modelName: string,
+	messages: any[],
+	settingsOfProvider: any,
+	mesEnabled: boolean,
+): Promise<string> => {
+	if (!mesEnabled) return modelName
+
+	const flashModel = mesFlashModelOfProvider[providerName]
+	const proModel = mesProModelOfProvider[providerName]
+	if (!flashModel || !proModel) return modelName
+
+	const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')
+	if (!lastUserMsg) return flashModel
+
+	const userText = typeof lastUserMsg.content === 'string'
+		? lastUserMsg.content
+		: lastUserMsg.content?.find?.((c: any) => c.type === 'text')?.text ?? ''
+
+	try {
+		let classification = 'SIMPLE'
+		const impl = (sendLLMMessageToProviderImplementation as any)[providerName]
+		if (!impl) return flashModel
+
+		await impl.sendChat({
+			messages: [{ role: 'user', content: `Reply with ONE word only — SIMPLE or COMPLEX.\nSIMPLE = quick question, lookup, small edit\nCOMPLEX = reasoning, debugging, architecture, analysis\n\nQuery: ${userText.slice(0, 400)}` }],
+			separateSystemMessage: undefined,
+			chatMode: null,
+			mcpTools: undefined,
+			modelName: flashModel,
+			providerName,
+			settingsOfProvider,
+			modelSelectionOptions: undefined,
+			overridesOfModel: undefined,
+			_setAborter: () => { },
+			onText: ({ fullText }: { fullText: string }) => { classification = fullText },
+			onFinalMessage: ({ fullText }: { fullText: string }) => { classification = fullText },
+			onError: () => { classification = 'SIMPLE' },
+		})
+
+		return classification.toUpperCase().includes('COMPLEX') ? proModel : flashModel
+	} catch {
+		return flashModel
+	}
+}
 
 export const sendLLMMessage = async ({
 	messagesType,
@@ -24,6 +86,7 @@ export const sendLLMMessage = async ({
 	chatMode,
 	separateSystemMessage,
 	mcpTools,
+	globalSettings,
 }: SendLLMMessageParams,
 
 	metricsService: IMetricsService
@@ -108,7 +171,8 @@ export const sendLLMMessage = async ({
 		}
 		const { sendFIM, sendChat } = implementation
 		if (messagesType === 'chatMessages') {
-			await sendChat({ messages: messages_, onText, onFinalMessage, onError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName, _setAborter, providerName, separateSystemMessage, chatMode, mcpTools })
+			const routedModel = messagesType === 'chatMessages' ? await mesRouteModel(providerName, modelName, messages_, settingsOfProvider, globalSettings?.modelEfficiencyScaling ?? true) : modelName
+			await sendChat({ messages: messages_, onText, onFinalMessage, onError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName: routedModel, _setAborter, providerName, separateSystemMessage, chatMode, mcpTools })
 			return
 		}
 		if (messagesType === 'FIMMessage') {
