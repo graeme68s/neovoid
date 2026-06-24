@@ -43,15 +43,15 @@ const mesRouteModel = async (
 	const userText = typeof lastUserMsg.content === 'string'
 		? lastUserMsg.content
 		: lastUserMsg.content?.find?.((c: any) => c.type === 'text')?.text ?? ''
-
+	// bypass classifier for long inputs - always Pro
+	if (userText.length > 500) return proModel
 	try {
 		let classification = 'SIMPLE'
 		const impl = (sendLLMMessageToProviderImplementation as any)[providerName]
 		if (!impl) return flashModel
 
 		await impl.sendChat({
-			messages: [{ role: 'user', content: `Reply with ONE word only — SIMPLE or COMPLEX.\nSIMPLE = quick question, lookup, small edit\nCOMPLEX = reasoning, debugging, architecture, analysis\n\nQuery: ${userText.slice(0, 400)}` }],
-			separateSystemMessage: undefined,
+			messages: [{ role: 'user', content: `Classify the user's input as SIMPLE or COMPLEX for routing to an AI engine.\nSIMPLE:\n- Short questions, quick lookups, basic definitions, or trivial syntax queries.\n- Casual conversation, greetings, or simple text editing/formatting requests.\n- Prompts that can be answered accurately in 1-2 sentences.\nCOMPLEX:\n- Code generation, debugging, system architecture, or mathematical proofs.\n- Long text blocks containing dense technical, scientific, or philosophical analysis.\n- Multi-step reasoning, logical arguments, or academic/expert-level explanations.\n- Any prompt exceeding ~150 words or containing heavy academic nomenclature.\nOutput ONLY the word SIMPLE or COMPLEX. No other text.\nQuery: ${userText.slice(0, 400)}\nClassification:` }],
 			chatMode: null,
 			mcpTools: undefined,
 			modelName: flashModel,
@@ -127,12 +127,13 @@ export const sendLLMMessage = async ({
 		onText_(params)
 		_fullTextSoFar = fullText
 	}
-
+	let routedModel: string | undefined = undefined
 	const onFinalMessage: OnFinalMessage = (params) => {
 		const { fullText, fullReasoning, toolCall } = params
 		if (_didAbort) return
 		captureLLMEvent(`${loggingName} - Received Full Message`, { messageLength: fullText.length, reasoningLength: fullReasoning?.length, duration: new Date().getMilliseconds() - submit_time.getMilliseconds(), toolCallName: toolCall?.name })
-		onFinalMessage_(params)
+		console.log('MES routedModel:', routedModel)
+		onFinalMessage_({ ...params, routedModel: routedModel })
 	}
 
 	const onError: OnError = ({ message: errorMessage, fullError }) => {
@@ -171,7 +172,7 @@ export const sendLLMMessage = async ({
 		}
 		const { sendFIM, sendChat } = implementation
 		if (messagesType === 'chatMessages') {
-			const routedModel = messagesType === 'chatMessages' ? await mesRouteModel(providerName, modelName, messages_, settingsOfProvider, globalSettings?.modelEfficiencyScaling ?? true) : modelName
+			routedModel = messagesType === 'chatMessages' ? await mesRouteModel(providerName, modelName, messages_, settingsOfProvider, globalSettings?.modelEfficiencyScaling ?? true) : modelName
 			await sendChat({ messages: messages_, onText, onFinalMessage, onError, settingsOfProvider, modelSelectionOptions, overridesOfModel, modelName: routedModel, _setAborter, providerName, separateSystemMessage, chatMode, mcpTools })
 			return
 		}

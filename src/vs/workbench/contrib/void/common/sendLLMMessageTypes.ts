@@ -93,7 +93,7 @@ export type AnthropicReasoning = ({ type: 'thinking'; thinking: any; signature: 
 
 export type OnText = (p: { fullText: string; fullReasoning: string; toolCall?: RawToolCallObj }) => void
 export type TokenUsage = { inputTokens: number; outputTokens: number; totalTokens: number; estimatedCostUsd: number }
-export type OnFinalMessage = (p: { fullText: string; fullReasoning: string; toolCall?: RawToolCallObj; anthropicReasoning: AnthropicReasoning[] | null; tokenUsage?: TokenUsage }) => void // id is tool_use_id
+export type OnFinalMessage = (p: { fullText: string; fullReasoning: string; toolCall?: RawToolCallObj; anthropicReasoning: AnthropicReasoning[] | null; tokenUsage?: TokenUsage; routedModel?: string }) => void
 export type OnError = (p: { message: string; fullError: Error | null }) => void
 export type OnAbort = () => void
 export type AbortRef = { current: (() => void) | null }

@@ -803,29 +803,6 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 				let resMessageIsDonePromise: (res: ResTypes) => void // resolves when user approves this tool use (or if tool doesn't require approval)
 				const messageIsDonePromise = new Promise<ResTypes>((res, rej) => { resMessageIsDonePromise = res })
 
-				// MES badge update
-				const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true
-				if (mesEnabled) {
-
-
-					const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')
-					const userText = lastUserMsg
-						? typeof (lastUserMsg as any).content === 'string'
-							? (lastUserMsg as any).content
-							: typeof (lastUserMsg as any).parts?.[0]?.text === 'string'
-								? (lastUserMsg as any).parts[0].text
-								: ''
-						: ''
-
-					const isComplex = userText.length > 200
-						|| /debug|architect|refactor|explain|analyse|analyze|design|implement|why|how does/i.test(userText)
-					setMESTier(isComplex ? 'pro' : 'flash')
-				} else {
-					setMESTier('off')
-				}
-
-
-
 				const llmCancelToken = this._llmMessageService.sendLLMMessage({
 					messagesType: 'chatMessages',
 					chatMode,
@@ -839,8 +816,18 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 					onText: ({ fullText, fullReasoning, toolCall }) => {
 						this._setStreamState(threadId, { isRunning: 'LLM', llmInfo: { displayContentSoFar: fullText, reasoningSoFar: fullReasoning, toolCallSoFar: toolCall ?? null }, interrupt: Promise.resolve(() => { if (llmCancelToken) this._llmMessageService.abort(llmCancelToken) }) })
 					},
-					onFinalMessage: async ({ fullText, fullReasoning, toolCall, anthropicReasoning, tokenUsage }) => {
+					onFinalMessage: async ({ fullText, fullReasoning, toolCall, anthropicReasoning, routedModel, tokenUsage }) => {
+
+						// use actual cost to determine tier
+						if (tokenUsage && tokenUsage.inputTokens > 0) {
+							const costPerMillion = (tokenUsage.estimatedCostUsd / tokenUsage.inputTokens) * 1_000_000
+							setMESTier(costPerMillion > 0.20 ? 'pro' : 'flash')
+						} else if (routedModel) {
+							const flashModels = ['claude-haiku-4-5', 'deepseek-v4-flash', 'gpt-4.1-nano', 'gemini-2.0-flash-lite', 'llama-3.1-8b-instant']
+							setMESTier(flashModels.includes(routedModel) ? 'flash' : 'pro')
+						}
 						resMessageIsDonePromise({ type: 'llmDone', toolCall, info: { fullText, fullReasoning, anthropicReasoning, tokenUsage } }) // resolve with tool calls
+
 					},
 					onError: async (error) => {
 						resMessageIsDonePromise({ type: 'llmError', error: error })
@@ -1126,25 +1113,25 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 		this._addUserModificationsToCurrCheckpoint({ threadId })
 
 		/*
-if undoing
+	if undoing
 
-A,B,C are all files.
-x means a checkpoint where the file changed.
+	A,B,C are all files.
+	x means a checkpoint where the file changed.
 
-A B C D E F G H I
-  x x x x x   x           <-- you can't always go up to find the "before" version; sometimes you need to go down
-  | | | | |   | x
---x-|-|-|-x---x-|-----     <-- to
+	A B C D E F G H I
+	x x x x x   x           <-- you can't always go up to find the "before" version; sometimes you need to go down
+	| | | | |   | x
+	--x-|-|-|-x---x-|-----     <-- to
 	| | | | x   x
 	| | x x |
 	| |   | |
-----x-|---x-x-------     <-- from
+	----x-|---x-x-------     <-- from
 	  x
 
-We need to revert anything that happened between to+1 and from.
-**We do this by finding the last x from 0...`to` for each file and applying those contents.**
-We only need to do it for files that were edited since `to`, ie files between to+1...from.
-*/
+	We need to revert anything that happened between to+1 and from.
+	**We do this by finding the last x from 0...`to` for each file and applying those contents.**
+	We only need to do it for files that were edited since `to`, ie files between to+1...from.
+	*/
 		if (toIdx < fromIdx) {
 			const { lastIdxOfURI } = this._getCheckpointsBetween({ threadId, loIdx: toIdx + 1, hiIdx: fromIdx })
 
@@ -1173,22 +1160,22 @@ We only need to do it for files that were edited since `to`, ie files between to
 		}
 
 		/*
-if redoing
+	if redoing
 
-A B C D E F G H I J
-  x x x x x   x     x
-  | | | | |   | x x x
---x-|-|-|-x---x-|-|---     <-- from
+	A B C D E F G H I J
+	x x x x x   x     x
+	| | | | |   | x x x
+	--x-|-|-|-x---x-|-|---     <-- from
 	| | | | x   x
 	| | x x |
 	| |   | |
-----x-|---x-x-----|---     <-- to
+	----x-|---x-x-----|---     <-- to
 	  x           x
 
 
-We need to apply latest change for anything that happened between from+1 and to.
-We only need to do it for files that were edited since `from`, ie files between from+1...to.
-*/
+	We need to apply latest change for anything that happened between from+1 and to.
+	We only need to do it for files that were edited since `from`, ie files between from+1...to.
+	*/
 		if (toIdx > fromIdx) {
 			const { lastIdxOfURI } = this._getCheckpointsBetween({ threadId, loIdx: fromIdx + 1, hiIdx: toIdx })
 			for (const fsPath in lastIdxOfURI) {
