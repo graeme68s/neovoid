@@ -5,8 +5,6 @@
 import { Disposable } from '../../../../base/common/lifecycle.js';
 import { IStatusbarService, StatusbarAlignment } from '../../../services/statusbar/browser/statusbar.js';
 import { IVoidSettingsService } from '../common/voidSettingsService.js';
-import { registerSingleton, InstantiationType } from '../../../../platform/instantiation/common/extensions.js';
-import { createDecorator } from '../../../../platform/instantiation/common/instantiation.js';
 import { IWorkbenchContribution } from '../../../common/contributions.js';
 import { registerWorkbenchContribution2, WorkbenchPhase } from '../../../common/contributions.js';
 export const MES_TIER_FLASH = 'flash';
@@ -49,9 +47,9 @@ export class MESStatusBarItem extends Disposable implements IWorkbenchContributi
 	private _getLabel(): string {
 		const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true;
 		if (!mesEnabled) return '$(circle-slash) MES';
-		if (_currentTier === 'flash') return '⚡ MES';
-		if (_currentTier === 'pro') return '🧠 MES';
-		return '◎ MES';
+		if (_currentTier === 'flash') return '$(zap) MES';
+		if (_currentTier === 'pro') return '$(circuit-board) MES';
+		return '$(circle-outline) MES';
 	}
 
 	private _getTooltip(): string {

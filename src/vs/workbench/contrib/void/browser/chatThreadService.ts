@@ -806,10 +806,17 @@ class ChatThreadService extends Disposable implements IChatThreadService {
 				// MES badge update
 				const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true
 				if (mesEnabled) {
-					const flashModels = ['claude-haiku-4-5', 'deepseek-v4-flash', 'gpt-4.1-nano', 'gemini-2.0-flash-lite', 'llama-3.1-8b-instant']
-					const proModels = ['claude-sonnet-4-6', 'deepseek-v4-pro', 'gpt-4.1', 'gemini-2.5-pro-preview-05-06', 'llama-3.3-70b-versatile']
+
+
 					const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')
-					const userText = typeof lastUserMsg?.content === 'string' ? lastUserMsg.content : ''
+					const userText = lastUserMsg
+						? typeof (lastUserMsg as any).content === 'string'
+							? (lastUserMsg as any).content
+							: typeof (lastUserMsg as any).parts?.[0]?.text === 'string'
+								? (lastUserMsg as any).parts[0].text
+								: ''
+						: ''
+
 					const isComplex = userText.length > 200
 						|| /debug|architect|refactor|explain|analyse|analyze|design|implement|why|how does/i.test(userText)
 					setMESTier(isComplex ? 'pro' : 'flash')
