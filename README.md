@@ -13,6 +13,7 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 | VSCode/Tailwind updates breaking everything | ❌ | ✅ Fixed — all deps pinned |
 | Extension marketplace locked out | ❌ | ✅ Unlocked |
 | Cursor costs $20/month | 💸 | 🆓 Bring your own API key |
+| Same model for every query | 🐌 | ⚡ Model Efficiency Scaling |
 | Abandoned | ☠️ | 🚀 Active |
 
 ---
@@ -20,22 +21,47 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 ## Features
 
 ### ✅ Done
-- **Extension marketplace access** — Install any extension without restrictions.
 - **Dependency pinning** — All dependencies locked to exact versions. Upstream updates will never break your install again.
-- **Token cost tracker** — Real-time spend display under every AI response. Shows input tokens, output tokens, and exact USD cost per message.
-- **Send to Chat** — Highlight any code and use the inline toolbar to send it directly to AI chat. No copy-paste.
+- **Extension marketplace access** — Install any extension without restrictions.
+- **Token cost tracker** — Real-time spend display under every AI response.
+- **Send to Chat** — Highlight any code and send it directly to AI chat. No copy-paste.
+- **Model Efficiency Scaling (MES)** — Automatically routes simple queries to a fast cheap model and complex reasoning to a pro model. Status bar badge shows which model is active in real time. Toggleable. Nobody else has this.
 
 ### 🔧 v1 In Progress
 - **System prompt presets** — Save and switch between modes (coding, review, architecture) with one click.
-- **Flash / Pro auto-router** — Simple queries go to the fast cheap model. Complex reasoning goes to Pro. Status bar badge shows which model is active. Toggleable.
+- **Flash / Pro auto-router refinement** — Improve classification accuracy and add per-provider model pairs.
 - **Update script** — One command to pull, compile, and package. Updates on your terms.
 - **Project rule files** — Drop a `.neovoidrules` file in any project root. NeoVoid auto-loads it as AI context when you open that workspace.
 
 ### 🗓️ v2 Planned
 - **Inline ghost text (FIM)** — AI autocomplete streamed directly into the editor as you type.
 - **@ mentions** — Type `@` in chat to attach files, folders, or terminal output to your context instantly.
-- **Agent mode** — Describe what you want, NeoVoid figures out which files to touch and makes the changes. Free. No subscription.
-- **Codebase indexing** — Full repo awareness so the AI understands your project, not just the open file.
+- **Agent mode** — Describe what you want in plain English. NeoVoid plans which files to touch, makes the changes, runs the code, and fixes its own errors. Free. No subscription.
+- **Codebase indexing** — Full repo awareness via vector database. The AI understands your entire project, not just the open file.
+
+---
+
+## Model Efficiency Scaling
+
+MES is a NeoVoid exclusive. No other open source editor has this.
+
+When you send a query, NeoVoid classifies it as simple or complex and routes it to the appropriate model automatically:
+
+| Query type | Example | Model |
+|---|---|---|
+| Simple | "what does this variable do" | ⚡ Flash (fast, cheap) |
+| Complex | "debug why my HMM is giving UNKNOWN states" | 🧠 Pro (full reasoning) |
+
+The status bar badge updates in real time. MES can be toggled on/off in settings.
+
+**Supported providers:**
+| Provider | Flash | Pro |
+|---|---|---|
+| DeepSeek | deepseek-v4-flash | deepseek-v4-pro |
+| Anthropic | claude-haiku-4-5 | claude-sonnet-4-6 |
+| OpenAI | gpt-4.1-nano | gpt-4.1 |
+| Gemini | gemini-2.0-flash-lite | gemini-2.5-pro |
+| Groq | llama-3.1-8b-instant | llama-3.3-70b-versatile |
 
 ---
 
@@ -45,7 +71,7 @@ NeoVoid supports bring-your-own-key for:
 
 - **Anthropic** — Claude Haiku, Sonnet, Opus
 - **DeepSeek** — V4 Flash, V4 Pro
-- **OpenAI** — GPT-4o, o1
+- **OpenAI** — GPT-4.1, o3, o4-mini
 - **Google** — Gemini Flash, Pro
 - **Mistral**, **Groq**, **Ollama** (local models)
 
