@@ -1359,7 +1359,25 @@ export const Settings = () => {
 												</ErrorBoundary>
 											</div>
 										</div>
-
+										{/* Model Efficiency Scaling */}
+										<ErrorBoundary>
+												<div className='w-full'>
+														<h4 className={`text-base`}>Model Efficiency Scaling (MES)</h4>
+														<div className='text-sm text-void-fg-3 mt-1'>Automatically routes simple queries to a fast cheap model and complex queries to a pro model.</div>
+														<div className='my-2'>
+																<div className='flex items-center gap-x-2 my-2'>
+																		<VoidSwitch
+																				size='xs'
+																				value={settingsState.globalSettings.modelEfficiencyScaling ?? true}
+																				onChange={(newVal) => voidSettingsService.setGlobalSetting('modelEfficiencyScaling', newVal)}
+																		/>
+																		<span className='text-void-fg-3 text-xs pointer-events-none'>
+																				{settingsState.globalSettings.modelEfficiencyScaling ?? true ? 'Enabled' : 'Disabled'}
+																		</span>
+																</div>
+														</div>
+												</div>
+										</ErrorBoundary>
 										{/* SCM */}
 										<ErrorBoundary>
 
