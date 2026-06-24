@@ -1,6 +1,6 @@
 # NeoVoid
 
-> A VS Code fork that actually works. Native AI integration, full Microsoft Marketplace access, dependency-locked for stability.
+> A VS Code fork that actually works. Native AI integration, full extension marketplace access, dependency-locked for stability.
 
 ---
 
@@ -11,7 +11,7 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 | Problem | Void | NeoVoid |
 |---|---|---|
 | VSCode/Tailwind updates breaking everything | ❌ | ✅ Fixed — all deps pinned |
-| Microsoft Marketplace locked out | ❌ | ✅ Unlocked |
+| Extension marketplace locked out | ❌ | ✅ Unlocked |
 | Cursor costs $20/month | 💸 | 🆓 Bring your own API key |
 | Abandoned | ☠️ | 🚀 Active |
 
@@ -20,8 +20,8 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 ## Features
 
 ### ✅ Done
-- **Microsoft Marketplace access** — Install Pylance, GitHub Copilot, C# Dev Kit, and every other proprietary extension. No restrictions.
-- **Dependency pinning** — All 161 dependencies locked to exact versions. VSCode and Tailwind updates will never break your install again.
+- **Extension marketplace access** — Install any extension without restrictions.
+- **Dependency pinning** — All dependencies locked to exact versions. Upstream updates will never break your install again.
 - **Token cost tracker** — Real-time spend display under every AI response. Shows input tokens, output tokens, and exact USD cost per message.
 - **Send to Chat** — Highlight any code and use the inline toolbar to send it directly to AI chat. No copy-paste.
 
@@ -34,6 +34,8 @@ The original [Void editor](https://github.com/voideditor/void) was archived in J
 ### 🗓️ v2 Planned
 - **Inline ghost text (FIM)** — AI autocomplete streamed directly into the editor as you type.
 - **@ mentions** — Type `@` in chat to attach files, folders, or terminal output to your context instantly.
+- **Agent mode** — Describe what you want, NeoVoid figures out which files to touch and makes the changes. Free. No subscription.
+- **Codebase indexing** — Full repo awareness so the AI understands your project, not just the open file.
 
 ---
 
