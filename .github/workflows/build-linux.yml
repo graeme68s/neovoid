@@ -61,16 +61,15 @@ jobs:
         run: npm run compile
 
       - name: Gulp Production Linux Package
-        run: npm run gulp vscode-linux-x64-min
+        run: npm run gulp vscode-linux-x64
 
       - name: Tarball Production Build
         run: |
-          cd ..
-          tar -czf neovoid-linux-x64.tar.gz VSCode-linux-x64/
+          tar -czf neovoid-linux-x64.tar.gz -C .. VSCode-linux-x64/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: neovoid-linux-x64
-          path: ../neovoid-linux-x64.tar.gz
+          path: neovoid-linux-x64.tar.gz
           compression-level: 6 # Balanced compression speed/size

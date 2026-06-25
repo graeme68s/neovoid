@@ -53,17 +53,15 @@ jobs:
 
       - name: Gulp Production macOS Package
         run: |
-          npm run gulp vscode-darwin-x64-min
+          npm run gulp vscode-darwin-x64
 
       - name: Tarball Production Build
         run: |
-          cd ..
-          # VSCode compiles out to VSCode-darwin-x64 (or customized product name folder)
-          tar -czf neovoid-mac-x64.tar.gz VSCode-darwin-x64/
+          tar -czf neovoid-mac-x64.tar.gz -C .. VSCode-darwin-x64/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: neovoid-mac-x64
-          path: ../neovoid-mac-x64.tar.gz
+          path: neovoid-mac-x64.tar.gz
           compression-level: 6
