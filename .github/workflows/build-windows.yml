@@ -28,7 +28,7 @@ jobs:
       - name: Compile TypeScript Core
         run: npm run compile
       - name: Gulp Production Windows Package
-        run: npm run gulp vscode-win32-x64-min
+        run: npm run gulp vscode-win32-x64
       - name: Archive Production Build
         shell: powershell
         run: |
