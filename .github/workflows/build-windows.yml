@@ -5,39 +5,65 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Prevents queue pile-ups if you push rapid commits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022 # Pinned to avoid breaking native node-modules on newer VS2026 images
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps --ignore-scripts
+      - name: Setup Python (Crucial for node-gyp on Windows)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: Rebuild native modules
+      - name: Configure Build Tools Platform
+        run: |
+          npm config set msvs_version 2022
+        shell: bash
+
+      - name: Install Dependencies
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts
+        shell: bash
+
+      - name: Rebuild Native Modules
         run: npm rebuild
+        shell: bash
 
-      - name: Build React
+      - name: Build React Frontend
         run: npm run buildreact
+        shell: bash
 
-      - name: Compile
+      - name: Compile TypeScript Core
         run: npm run compile
+        shell: bash
 
-      - name: Build
+      - name: Gulp Production Windows Package
         run: npm run gulp vscode-win32-x64-min
+        shell: bash
 
-      - name: Package
-        run: Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
+      - name: Archive Production Build
+        run: |
+          cd ..
+          compress-archive -Path VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
+        shell: powershell
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: neovoid-windows-x64
-          path: neovoid-windows-x64.zip
-EOF
+          path: ../neovoid-windows-x64.zip
+          compression-level: 6
