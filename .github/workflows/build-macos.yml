@@ -5,40 +5,65 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Automatically cancels old builds if you push new commits to the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-13 # Intel x86_64 runner matching the x64 build target
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps --ignore-scripts
+      - name: Setup Python (Required for node-gyp)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-      - name: Rebuild native modules
-        run: npm rebuild
+      - name: Install System Dependencies
+        run: |
+          brew update
+          # Critical for building native tools like keytar or canvas-based modules if present
+          brew install pkg-config pixman cairo
 
-      - name: Build React
-        run: npm run buildreact
+      - name: Install Dependencies
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts
 
-      - name: Compile
-        run: npm run compile
+      - name: Rebuild Native Modules
+        run: |
+          npm rebuild
 
-      - name: Build
-        run: npm run gulp vscode-darwin-x64-min
+      - name: Build React Frontend
+        run: |
+          npm run buildreact
 
-      - name: Package
+      - name: Compile TypeScript Core
+        run: |
+          npm run compile
+
+      - name: Gulp Production macOS Package
+        run: |
+          npm run gulp vscode-darwin-x64-min
+
+      - name: Tarball Production Build
         run: |
           cd ..
-          tar -czf neovoid-macos-x64.tar.gz VSCode-darwin-x64/
+          # VSCode compiles out to VSCode-darwin-x64 (or customized product name folder)
+          tar -czf neovoid-mac-x64.tar.gz VSCode-darwin-x64/
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: neovoid-macos-x64
-          path: ../neovoid-macos-x64.tar.gz
+          name: neovoid-mac-x64
+          path: ../neovoid-mac-x64.tar.gz
+          compression-level: 6
