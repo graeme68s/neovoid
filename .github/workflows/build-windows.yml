@@ -1,66 +1,39 @@
 name: Build Windows
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
-# Prevents queue pile-ups if you push rapid commits
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   build:
-    runs-on: windows-2022 # Pinned to avoid breaking native node-modules on newer VS2026 images
-
+    runs-on: windows-2022
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      - name: Setup Python (Crucial for node-gyp on Windows)
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
-      - name: Configure Build Tools Platform
-        run: |
-          echo "MSVS_VERSION=2022" >> $GITHUB_ENV
-        shell: bash
-
       - name: Install Dependencies
-        run: |
-          npm install --legacy-peer-deps --ignore-scripts
-        shell: bash
-
-      - name: Rebuild Native Modules
-        run: npm rebuild
-        shell: bash
-
+        run: npm install --legacy-peer-deps
       - name: Build React Frontend
         run: npm run buildreact
-        shell: bash
-
       - name: Compile TypeScript Core
         run: npm run compile
-        shell: bash
-
       - name: Gulp Production Windows Package
         run: npm run gulp vscode-win32-x64-min
-        shell: bash
-
       - name: Archive Production Build
+        shell: powershell
         run: |
           cd ..
-          compress-archive -Path VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
-        shell: powershell
-
+          Compress-Archive -Path VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
