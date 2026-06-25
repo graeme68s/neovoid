@@ -47,15 +47,7 @@ jobs:
             libgtk-3-dev
 
       - name: Install Dependencies
-        run: |
-          # Use npm ci if you have a package-lock.json, otherwise stick to install
-          npm install --legacy-peer-deps --ignore-scripts
-
-      - name: Install Extension Dependencies
-        run: cd extensions && npm install --legacy-peer-deps || true
-
-      - name: Rebuild Native Modules
-        run: npm rebuild
+        run: npm install --legacy-peer-deps
 
       - name: Build React Frontend
         run: npm run buildreact
