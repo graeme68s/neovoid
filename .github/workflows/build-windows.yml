@@ -12,31 +12,38 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
+
       - name: Build React Frontend
         run: npm run buildreact
+
       - name: Compile TypeScript Core
         run: npm run compile
+
       - name: Gulp Production Windows Package
         run: npm run gulp vscode-win32-x64
+
       - name: Archive Production Build
         shell: powershell
         run: |
-          cd ..
-          Compress-Archive -Path VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
+          Compress-Archive -Path ..\VSCode-win32-x64 -DestinationPath neovoid-windows-x64.zip
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: neovoid-windows-x64
-          path: ../neovoid-windows-x64.zip
+          path: neovoid-windows-x64.zip
           compression-level: 6
