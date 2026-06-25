@@ -51,6 +51,9 @@ jobs:
           # Use npm ci if you have a package-lock.json, otherwise stick to install
           npm install --legacy-peer-deps --ignore-scripts
 
+      - name: Install Extension Dependencies
+        run: cd extensions && npm install --legacy-peer-deps || true
+
       - name: Rebuild Native Modules
         run: npm rebuild
 
