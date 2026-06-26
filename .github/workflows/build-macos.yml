@@ -24,8 +24,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Check Python
-        run: python3 --version
+      - name: Configure Native macOS Python Path
+        run: |
+          # Explicitly point npm/node-gyp to the local system Python 3 binary
+          npm config set python /usr/bin/python3
 
       - name: Install System Dependencies
         run: |
