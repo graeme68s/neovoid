@@ -42,16 +42,46 @@ jobs:
           # 2. Run the clean install for everything else
           npm install --no-audit --no-fund
 
-          # 3. Create a fake mock directory for spdlog so the compiler doesn't choke
+          # 3. Create a fake mock directory for spdlog
           mkdir -p node_modules/@vscode/spdlog
 
-          # 4. Write an empty package.json and index.js for the mock module
+          # 4. Write an expanded package.json and index.js for the mock module
           echo '{"name": "@vscode/spdlog", "version": "1.0.0", "main": "index.js"}' > node_modules/@vscode/spdlog/package.json
-          echo 'module.exports = { SpdLog: class { setLevel() {} clearFormatters() {} flush() {} drop() {} }, RotatingLogger: class { setLevel() {} clearFormatters() {} flush() {} drop() {} } };' > node_modules/@vscode/spdlog/index.js
 
-          # 5. Provide basic type definitions to satisfy the TS compiler flags
-          echo 'export class SpdLog { setLevel(level: number): void; clearFormatters(): void; flush(): void; drop(): void; }' > node_modules/@vscode/spdlog/index.d.ts
-          echo 'export class RotatingLogger { constructor(name: string, filename: string, maxFileSize: number, maxFiles: number); setLevel(level: number): void; clearFormatters(): void; flush(): void; drop(): void; }' >> node_modules/@vscode/spdlog/index.d.ts
+          cat << 'EOF' > node_modules/@vscode/spdlog/index.js
+          class DummyLogger {
+            setLevel() {}
+            clearFormatters() {}
+            flush() {}
+            drop() {}
+          }
+          module.exports = {
+            version: '1.0.0',
+            setFlushOn: function() {},
+            createRotatingLogger: function() { return new DummyLogger(); },
+            createAsyncRotatingLogger: function() { return new DummyLogger(); },
+            SpdLog: DummyLogger,
+            RotatingLogger: DummyLogger,
+            Logger: DummyLogger
+          };
+          EOF
+
+          # 5. Provide matching detailed type definitions for the TS compiler
+          cat << 'EOF' > node_modules/@vscode/spdlog/index.d.ts
+          export const version: string;
+          export function setFlushOn(level: number): void;
+          export function createRotatingLogger(name: string, filename: string, maxFileSize: number, maxFiles: number): Logger;
+          export function createAsyncRotatingLogger(name: string, filename: string, maxFileSize: number, maxFiles: number): Logger;
+
+          export class Logger {
+            setLevel(level: number): void;
+            clearFormatters(): void;
+            flush(): void;
+            drop(): void;
+          }
+          export class SpdLog extends Logger {}
+          export class RotatingLogger extends Logger {}
+          EOF
 
       - name: Rebuild Native Modules
         run: |
