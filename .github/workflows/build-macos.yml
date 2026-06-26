@@ -32,9 +32,8 @@ jobs:
           brew update
           brew install pkg-config pixman cairo
 
-      - name: Install Dependencies
-        run: |
-          npm install --legacy-peer-deps --ignore-scripts
+      - name: Install Node Dependencies
+        run: npm install --ignore-scripts
 
       - name: Rebuild Native Modules
         run: |
