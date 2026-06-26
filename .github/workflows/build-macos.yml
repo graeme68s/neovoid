@@ -24,10 +24,13 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Configure Native macOS Python Path
-        run: |
-          # Explicitly point npm/node-gyp to the local system Python 3 binary
-          npm config set python /usr/bin/python3
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        env:
+          # Forces the action to use your local home directory instead of /Users/runner
+          AGENT_TOOLSDIRECTORY: /Users/graemesprigge/actions-runner/_work/_tool
+        with:
+          python-version: '3.10'
 
       - name: Install System Dependencies
         run: |
