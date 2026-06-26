@@ -33,7 +33,12 @@ jobs:
           brew install pkg-config pixman cairo
 
       - name: Install Node Dependencies
-        run: npm install --ignore-scripts
+        run: |
+          # Force npm to bypass the native compilation of spdlog cleanly
+          npm config set npm_config_spdlog_binary_host "https://localhost" --global || true
+
+          # Run the install, and if spdlog's install script fails, force a pass so other dependencies install
+          npm install || npm install --ignore-scripts=@vscode/spdlog
 
       - name: Rebuild Native Modules
         run: |
@@ -44,9 +49,8 @@ jobs:
         run: |
           npm run buildreact
 
-      - name: Compile TypeScript Core
-        run: |
-          npm run compile
+      - name: Run Compile
+        run: npm run compile
 
       - name: Gulp Production macOS Package
         run: |
