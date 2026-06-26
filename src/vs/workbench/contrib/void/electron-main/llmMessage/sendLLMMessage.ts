@@ -50,22 +50,26 @@ const mesRouteModel = async (
 		const impl = (sendLLMMessageToProviderImplementation as any)[providerName]
 		if (!impl) return flashModel
 
-		await impl.sendChat({
-			messages: [{ role: 'user', content: `Classify the user's input as SIMPLE or COMPLEX for routing to an AI engine.\nSIMPLE:\n- Short questions, quick lookups, basic definitions, or trivial syntax queries.\n- Casual conversation, greetings, or simple text editing/formatting requests.\n- Prompts that can be answered accurately in 1-2 sentences.\nCOMPLEX:\n- Code generation, debugging, system architecture, or mathematical proofs.\n- Long text blocks containing dense technical, scientific, or philosophical analysis.\n- Multi-step reasoning, logical arguments, or academic/expert-level explanations.\n- Any prompt exceeding ~150 words or containing heavy academic nomenclature.\nOutput ONLY the word SIMPLE or COMPLEX. No other text.\nQuery: ${userText.slice(0, 400)}\nClassification:` }],
-			chatMode: null,
-			mcpTools: undefined,
-			modelName: flashModel,
-			providerName,
-			settingsOfProvider,
-			modelSelectionOptions: undefined,
-			overridesOfModel: undefined,
-			_setAborter: () => { },
-			onText: ({ fullText }: { fullText: string }) => { classification = fullText },
-			onFinalMessage: ({ fullText }: { fullText: string }) => { classification = fullText },
-			onError: () => { classification = 'SIMPLE' },
+		const classifierPromise = new Promise<void>(resolve => {
+			impl.sendChat({
+				messages: [{ role: 'user', content: `Classify the user's input as SIMPLE or COMPLEX for routing to an AI engine.\nSIMPLE:\n- Short questions, quick lookups, basic definitions, or trivial syntax queries.\n- Casual conversation, greetings, or simple text editing/formatting requests.\n- Prompts that can be answered accurately in 1-2 sentences.\nCOMPLEX:\n- Code generation, debugging, system architecture, or mathematical proofs.\n- Long text blocks containing dense technical, scientific, or philosophical analysis.\n- Multi-step reasoning, logical arguments, or academic/expert-level explanations.\n- Any prompt exceeding ~150 words or containing heavy academic nomenclature.\nOutput ONLY the word SIMPLE or COMPLEX. No other text.\nQuery: ${userText.slice(0, 400)}\nClassification:` }],
+				chatMode: null,
+				mcpTools: undefined,
+				modelName: flashModel,
+				providerName,
+				settingsOfProvider,
+				modelSelectionOptions: undefined,
+				overridesOfModel: undefined,
+				_setAborter: () => { },
+				onText: ({ fullText }: { fullText: string }) => { classification = fullText },
+				onFinalMessage: ({ fullText }: { fullText: string }) => { classification = fullText; resolve() },
+				onError: () => { classification = 'SIMPLE'; resolve() },
+			})
 		})
+		const timeoutPromise = new Promise<void>(resolve => setTimeout(resolve, 3000))
+		await Promise.race([classifierPromise, timeoutPromise])
 
-		return classification.toUpperCase().includes('COMPLEX') ? proModel : flashModel
+		return /^COMPLEX$/i.test(classification.trim()) ? proModel : flashModel
 	} catch {
 		return flashModel
 	}
