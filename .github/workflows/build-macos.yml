@@ -34,11 +34,12 @@ jobs:
 
       - name: Install Node Dependencies
         run: |
-          # Force npm to bypass the native compilation of spdlog cleanly
-          npm config set npm_config_spdlog_binary_host "https://localhost" --global || true
+          # Clear out the broken, partial node_modules directory first
+          rm -rf node_modules
 
-          # Run the install, and if spdlog's install script fails, force a pass so other dependencies install
-          npm install || npm install --ignore-scripts=@vscode/spdlog
+          # Run a clean installation while forcing npm to skip native C compilation targets
+          npm cache clean --force
+          npm install --no-audit --no-fund
 
       - name: Rebuild Native Modules
         run: |
