@@ -37,7 +37,8 @@ jobs:
 
       - name: Rebuild Native Modules
         run: |
-          npm rebuild
+          # If you need to rebuild everything EXCEPT spdlog, we can bypass it like this:
+          npm rebuild --ignore-scripts=@vscode/spdlog
 
       - name: Build React Frontend
         run: |
