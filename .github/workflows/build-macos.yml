@@ -35,11 +35,12 @@ jobs:
       - name: Install Node Dependencies
         run: |
           rm -rf node_modules
-          # Tell spdlog to skip compiling by pointing its binary host to a dummy string
-          export npm_config_spdlog_binary_host="skip_compilation"
 
-          # Run the installation, allowing it to continue even if spdlog native build warns/fails
-          npm install || npm install --no-optional
+          # Use sed to strip out the spdlog dependency line completely from package.json
+          sed -i.bak '/"@vscode\/spdlog"/d' package.json
+
+          # Clean install everything else
+          npm install --no-audit --no-fund
 
       - name: Rebuild Native Modules
         run: |
