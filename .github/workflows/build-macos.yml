@@ -28,6 +28,7 @@ jobs:
 
       - name: Install System Dependencies
         run: |
+          export PATH="/opt/homebrew/bin:$PATH"
           brew update
           brew install pkg-config pixman cairo
 
