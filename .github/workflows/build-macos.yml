@@ -21,13 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Configure Native macOS Python Path
         run: |
-          echo "Checking system python version..."
-          python3 --version
-          # Force npm and node-gyp to use the built-in macOS Python path
+          echo "Forcing build tools to use native Python..."
           npm config set python /usr/bin/python3
 
       - name: Install System Dependencies
