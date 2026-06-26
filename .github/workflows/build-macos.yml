@@ -34,12 +34,8 @@ jobs:
 
       - name: Install Node Dependencies
         run: |
-          # Clear out the broken, partial node_modules directory first
           rm -rf node_modules
-
-          # Run a clean installation while forcing npm to skip native C compilation targets
-          npm cache clean --force
-          npm install --no-audit --no-fund
+          npm ci
 
       - name: Rebuild Native Modules
         run: |
