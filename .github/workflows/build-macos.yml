@@ -36,11 +36,22 @@ jobs:
         run: |
           rm -rf node_modules
 
-          # Use sed to strip out the spdlog dependency line completely from package.json
+          # 1. Strip the real spdlog from package.json
           sed -i.bak '/"@vscode\/spdlog"/d' package.json
 
-          # Clean install everything else
+          # 2. Run the clean install for everything else
           npm install --no-audit --no-fund
+
+          # 3. Create a fake mock directory for spdlog so the compiler doesn't choke
+          mkdir -p node_modules/@vscode/spdlog
+
+          # 4. Write an empty package.json and index.js for the mock module
+          echo '{"name": "@vscode/spdlog", "version": "1.0.0", "main": "index.js"}' > node_modules/@vscode/spdlog/package.json
+          echo 'module.exports = { SpdLog: class { setLevel() {} clearFormatters() {} flush() {} drop() {} }, RotatingLogger: class { setLevel() {} clearFormatters() {} flush() {} drop() {} } };' > node_modules/@vscode/spdlog/index.js
+
+          # 5. Provide basic type definitions to satisfy the TS compiler flags
+          echo 'export class SpdLog { setLevel(level: number): void; clearFormatters(): void; flush(): void; drop(): void; }' > node_modules/@vscode/spdlog/index.d.ts
+          echo 'export class RotatingLogger { constructor(name: string, filename: string, maxFileSize: number, maxFiles: number); setLevel(level: number): void; clearFormatters(): void; flush(): void; drop(): void; }' >> node_modules/@vscode/spdlog/index.d.ts
 
       - name: Rebuild Native Modules
         run: |
