@@ -25,7 +25,6 @@ jobs:
       - name: Configure Native macOS Python Path
         run: |
           echo "Forcing build tools to use native Python..."
-          npm config set python /usr/bin/python3
 
       - name: Install System Dependencies
         run: |
