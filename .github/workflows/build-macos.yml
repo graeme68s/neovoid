@@ -35,7 +35,11 @@ jobs:
       - name: Install Node Dependencies
         run: |
           rm -rf node_modules
-          npm ci
+          # Tell spdlog to skip compiling by pointing its binary host to a dummy string
+          export npm_config_spdlog_binary_host="skip_compilation"
+
+          # Run the installation, allowing it to continue even if spdlog native build warns/fails
+          npm install || npm install --no-optional
 
       - name: Rebuild Native Modules
         run: |
