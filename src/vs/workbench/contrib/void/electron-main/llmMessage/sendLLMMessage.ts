@@ -47,16 +47,20 @@ const mesRouteModel = async (
 	if (userText.length > 500) return proModel
 	try {
 		let classification = 'SIMPLE'
-		const impl = (sendLLMMessageToProviderImplementation as any)[providerName]
-		if (!impl) return flashModel
+		// Use Groq for classification if key available — ~200ms vs 8s latency
+		const groqKey = settingsOfProvider?.groq?.apiKey
+		const classifierProviderName = groqKey ? 'groq' : providerName
+		const classifierModel = groqKey ? 'llama-3.1-8b-instant' : flashModel
+		const classifierImpl = (sendLLMMessageToProviderImplementation as any)[classifierProviderName]
+		if (!classifierImpl) return flashModel
 
 		const classifierPromise = new Promise<void>(resolve => {
-			impl.sendChat({
+			classifierImpl.sendChat({
 				messages: [{ role: 'user', content: `Classify the user's input as SIMPLE or COMPLEX for routing to an AI engine.\nSIMPLE:\n- Short questions, quick lookups, basic definitions, or trivial syntax queries.\n- Casual conversation, greetings, or simple text editing/formatting requests.\n- Prompts that can be answered accurately in 1-2 sentences.\nCOMPLEX:\n- Code generation, debugging, system architecture, or mathematical proofs.\n- Long text blocks containing dense technical, scientific, or philosophical analysis.\n- Multi-step reasoning, logical arguments, or academic/expert-level explanations.\n- Any prompt exceeding ~150 words or containing heavy academic nomenclature.\nOutput ONLY the word SIMPLE or COMPLEX. No other text.\nQuery: ${userText.slice(0, 400)}\nClassification:` }],
 				chatMode: null,
 				mcpTools: undefined,
-				modelName: flashModel,
-				providerName,
+				modelName: classifierModel,
+				providerName: classifierProviderName,
 				settingsOfProvider,
 				modelSelectionOptions: undefined,
 				overridesOfModel: undefined,

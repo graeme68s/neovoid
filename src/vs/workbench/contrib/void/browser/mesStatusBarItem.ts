@@ -47,16 +47,16 @@ export class MESStatusBarItem extends Disposable implements IWorkbenchContributi
 	private _getLabel(): string {
 		const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true;
 		if (!mesEnabled) return '$(circle-slash) MES';
-		if (_currentTier === 'flash') return '$(zap) MES';
-		if (_currentTier === 'pro') return '$(circuit-board) MES';
+		if (_currentTier === 'flash') return '$(zap) MES › Flash';
+		if (_currentTier === 'pro') return '$(rocket) MES › Pro';
 		return '$(circle-outline) MES';
 	}
 
 	private _getTooltip(): string {
 		const mesEnabled = this._settingsService.state.globalSettings.modelEfficiencyScaling ?? true;
 		if (!mesEnabled) return 'Model Efficiency Scaling: OFF';
-		if (_currentTier === 'flash') return 'Model Efficiency Scaling: Flash (simple query)';
-		if (_currentTier === 'pro') return 'Model Efficiency Scaling: Pro (complex query)';
+		if (_currentTier === 'flash') return 'Model Efficiency Scaling: routed to Flash (simple query)';
+		if (_currentTier === 'pro') return 'Model Efficiency Scaling: routed to Pro (complex query)';
 		return 'Model Efficiency Scaling: ON';
 	}
 
