@@ -116,7 +116,7 @@ export class VoidMainUpdateService extends Disposable implements IVoidUpdateServ
 						action = 'reinstall'
 					}
 					else {
-						message = 'Void is up-to-date!'
+						message = 'NeoVoid is up-to-date!'
 					}
 				}
 				else {
