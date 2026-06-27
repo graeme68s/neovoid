@@ -117,7 +117,7 @@ export const subTextMdOfProviderName = (providerName: ProviderName): string => {
 	if (providerName === 'deepseek') return 'Get your [API Key here](https://platform.deepseek.com/api_keys).'
 	if (providerName === 'openRouter') return 'Get your [API Key here](https://openrouter.ai/settings/keys). Read about [rate limits here](https://openrouter.ai/docs/api-reference/limits).'
 	if (providerName === 'gemini') return 'Get your [API Key here](https://aistudio.google.com/apikey). Read about [rate limits here](https://ai.google.dev/gemini-api/docs/rate-limits#current-rate-limits).'
-	if (providerName === 'groq') return 'Get your [API Key here](https://console.groq.com/keys).'
+	if (providerName === 'groq') return 'Get your [API Key here](https://console.groq.com/keys). **For low latency MES routing, a free Groq API key is recommended.**'
 	if (providerName === 'xAI') return 'Get your [API Key here](https://console.x.ai).'
 	if (providerName === 'mistral') return 'Get your [API Key here](https://console.mistral.ai/api-keys).'
 	if (providerName === 'openAICompatible') return `Use any provider that's OpenAI-compatible (use this for llama.cpp and more).`
